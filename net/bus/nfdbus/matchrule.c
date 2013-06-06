@@ -188,6 +188,26 @@ bus_match_rule_set_member(struct bus_match_rule *rule,
 }
 
 static int
+bus_match_rule_set_path(struct bus_match_rule *rule,
+			const char *path,
+			gfp_t gfp_flags)
+{
+	char *new;
+
+	WARN_ON(!path);
+
+	new = kstrdup(path, gfp_flags);
+	if (new == NULL)
+		return 0;
+
+	rule->flags |= BUS_MATCH_PATH;
+	kfree(rule->path);
+	rule->path = new;
+
+	return 1;
+}
+
+static int
 bus_match_rule_set_sender(struct bus_match_rule *rule,
 			  const char *sender,
 			  gfp_t gfp_flags)
@@ -524,6 +544,18 @@ struct bus_match_rule *bus_match_rule_parse(const char *rule_text,
 			if (!bus_match_rule_set_member(rule, value,
 						       gfp_flags)) {
 				pr_err("Out of memeory");
+				goto failed;
+			}
+		} else if (strcmp(key, "path") == 0) {
+			if (rule->flags & BUS_MATCH_PATH) {
+				pr_warn("Key %s specified twice in match rule\n",
+					key);
+				goto failed;
+			}
+
+			if (!bus_match_rule_set_path(rule, value,
+						     gfp_flags)) {
+				pr_err("Out of memory");
 				goto failed;
 			}
 		} else if (strcmp(key, "destination") == 0) {
