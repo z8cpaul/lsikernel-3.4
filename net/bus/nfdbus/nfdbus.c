@@ -192,6 +192,12 @@ static unsigned int dbus_filter(unsigned int hooknum,
 		 msg.member ? msg.member : "",
 		 matchmaker);
 
+	if (sendctx->eavesdropper) {
+		pr_debug("The destination is an eavesdropper. ACCEPT.\n");
+		ret = NF_ACCEPT;
+		goto out;
+	}
+
 	if (!matchmaker) {
 		pr_debug("No match rules for this recipient. DROP.\n");
 		ret = NF_DROP;
