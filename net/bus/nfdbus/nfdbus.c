@@ -171,7 +171,7 @@ static unsigned int dbus_filter(unsigned int hooknum,
 				 sendctx->recipient);
 
 			sender = find_match_maker(sendctx->sender, true, false);
-			bus_matchmaker_remove_name(sender, msg.name_acquired);
+			bus_matchmaker_remove_name(sender, msg.name_lost);
 		}
 
 		pr_debug("AF_BUS packet '%s' from the bus master. ACCEPT.\n",
