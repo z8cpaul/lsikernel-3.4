@@ -1159,6 +1159,7 @@ void bus_matchmaker_remove_name(struct bus_match_maker *matchmaker,
 			rb_erase(&data->node, &matchmaker->names);
 			kfree(data->name);
 			kfree(data);
+			node = NULL;
 		}
 	}
 
