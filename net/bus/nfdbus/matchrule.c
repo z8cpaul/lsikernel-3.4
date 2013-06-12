@@ -840,16 +840,18 @@ void bus_matchmaker_remove_rule_by_value(struct bus_match_maker *matchmaker,
 			match_rule_search(&pool->rules_by_iface,
 					  rule->interface);
 
-		struct hlist_node *cur;
-		struct bus_match_rule *cur_rule;
-		hlist_for_each_entry(cur_rule, cur, &head->first, list) {
-			if (match_rule_equal(cur_rule, rule)) {
-				hlist_del(cur);
-				if (hlist_empty(&head->first))
-					rb_erase(&head->node,
-						 &pool->rules_by_iface);
-				bus_match_rule_free(cur_rule);
-				break;
+		if (head) {
+			struct hlist_node *cur;
+			struct bus_match_rule *cur_rule;
+			hlist_for_each_entry(cur_rule, cur, &head->first, list) {
+				if (match_rule_equal(cur_rule, rule)) {
+					hlist_del(cur);
+					if (hlist_empty(&head->first))
+						rb_erase(&head->node,
+							 &pool->rules_by_iface);
+					bus_match_rule_free(cur_rule);
+					break;
+				}
 			}
 		}
 	} else {
