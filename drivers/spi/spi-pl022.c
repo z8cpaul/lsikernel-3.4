@@ -2600,6 +2600,10 @@ pl022_of_remove(struct platform_device *ofdev)
 
 static struct of_device_id pl022_match[] = {
 	{
+		.compatible = "arm,acp-ssp",
+		.data = (void *)&vendor_arm,
+	},
+	{
 		.compatible = "acp-ssp",
 		.data = (void *)&vendor_arm,
 	},
@@ -2618,7 +2622,7 @@ static struct platform_driver pl022_driver = {
 #endif
 static int __init pl022_init(void)
 {
-	printk(KERN_INFO "--> %s:%d -\n", __FILE__, __LINE__);
+	pr_info("--> %s:%d -\n", __FILE__, __LINE__);
 #ifdef CONFIG_ARM_AMBA
 	return amba_driver_register(&pl022_driver);
 #else
