@@ -138,8 +138,7 @@ ci13612_fixup_usbcmd_rs(struct ehci_hcd *ehci)
 	port_status = ehci_readl(ehci, &ehci->regs->port_status[0]);
 	pr_info("ehci-ci13612: port_status = 0x%x\n", port_status);
 	if (port_status & 0x100) {
-		pr_err("ehci-ci13612: USB port is in reset status, "
-		       "not able to change HC status to run\n");
+		pr_err("ehci-ci13612: USB port is in reset status, not able to change HC status to run\n");
 		return -EFAULT;
 	}
 	return 0;
@@ -171,7 +170,7 @@ ci13612_fixup_txpburst(struct ehci_hcd *ehci)
 	ehci_writel(ehci, burst_size, &ehci->regs->reserved[1]);
 }
 #else
-#define ci13612_fixup_txpburst(ehci) do { (void)ehci; } while(0)
+#define ci13612_fixup_txpburst(ehci) do { (void)ehci; } while (0)
 #endif
 
 static int ci13612_ehci_run(struct usb_hcd *hcd)
@@ -260,7 +259,8 @@ static int ci13612_ehci_probe(struct platform_device *pdev)
 	pdev->dev.coherent_dma_mask = DMA_BIT_MASK(32);
 	pdev->dev.dma_mask = &pdev->dev.coherent_dma_mask;
 
-	hcd = usb_create_hcd(&ci13612_hc_driver, &pdev->dev, dev_name(&pdev->dev));
+	hcd = usb_create_hcd(&ci13612_hc_driver, &pdev->dev,
+			dev_name(&pdev->dev));
 	if (!hcd) {
 		retval = -ENOMEM;
 		goto fail_create_hcd;
@@ -285,8 +285,8 @@ static int ci13612_ehci_probe(struct platform_device *pdev)
 		/* Set address bits [39:32] to zero */
 		writel(0x0, gpreg_base + 0x8);
 #ifndef CONFIG_LSI_USB_SW_WORKAROUND
-		/* hprot pass-through (let the controller drive hprot[0:3] */
-		writel(0x100, gpreg_base + 0x74);
+		/* hprot cachable and bufferable */
+		writel(0xc, gpreg_base + 0x74);
 #endif
 		iounmap(gpreg_base);
 	}
