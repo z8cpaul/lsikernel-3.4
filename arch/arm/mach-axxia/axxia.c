@@ -253,6 +253,7 @@ l3_set_pstate(void __iomem *l3ctrl, unsigned int req, unsigned int act)
 void __init axxia_dt_init(void)
 {
 	void __iomem *l3ctrl;
+	void __iomem *apb2ser3_base;
 	int rc;
 
 	/* Enable L3-cache */
