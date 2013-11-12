@@ -90,7 +90,7 @@
                         clock-frequency = <0>; // Filled in by zImage
                         UART0: serial@00404000 {
                                 device_type = "serial";
-                                compatible = "acp-uart0";
+                                compatible = "lsi,acp-uart0";
                                 enabled = <1>;
                                 reg = <0x00404000 0x1000>;
                                 clock-reg = <0x00408040 0x20>;
@@ -101,7 +101,7 @@
                         };
                         UART1: serial@00405000 {
                                 device_type = "serial";
-                                compatible = "acp-uart1";
+				 compatible = "lsi,acp-uart1";
                                 enabled = <0>;
                                 reg = <0x00405000 0x1000>;
                                 clock-reg = <0x00408060 0x20>;
@@ -120,14 +120,14 @@
                                 interrupts = <31>;
                         };
                         I2C: i2c@00403000 {
-                                compatible = "acp-i2c";
+                                compatible = "lsi,acp-i2c";
                                 enabled = <0>;
                                 reg = <0x00403000 0x00001000>;
                                 interrupt-parent = <&MPIC>;
                                 interrupts = <21>;
                         };
                         SSP: ssp@00402000 {
-                                compatible = "acp-ssp";
+                                compatible = "arm,acp-ssp";
                                 enabled = <0>;
                                 reg = <0x00402000 0x00001000>;
                                 interrupt-parent = <&MPIC>;
@@ -135,14 +135,14 @@
                         };
                         NAND: nand@00440000 {
                                 device_type = "nand";
-                                compatible = "acp-nand";
+                                compatible = "lsi,acp-nand";
                                 enabled = <1>;
                                 reg = <0x00440000 0x20000
                                        0x0040c000 0x1000>;
                         };
                         FEMAC: femac@00480000 {
                                 device_type = "network";
-                                compatible = "acp-femac";
+                                compatible = "lsi,acp-femac";
                                 enabled = <1>;
                                 reg = <0x00480000 0x1000
                                        0x00481000 0x1000
@@ -285,7 +285,7 @@
         };
 
         rio0: rapidio@f0020000 {
-                compatible = "acp,rapidio-delta";
+                compatible = "lsi,rapidio-delta";
                 device_type = "rapidio";
                 enabled = <0>;
                 #size = <0>;    /* 0 = (256, small system)

@@ -1,5 +1,5 @@
 /*
- * arch/arm/boot/dts/axm5500-sim.dts
+ * arch/arm/boot/dts/axm55xxemu.dts
  *
  * Copyright (C) 2012 LSI
  *
@@ -93,6 +93,23 @@
 		*/
 	};
 
+	clocks {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		cpu {
+			frequency = <0>; /* Filled in by the boot loader. */
+		};
+
+		peripheral {
+			frequency = <0>; /* Filled in by the boot loader. */
+		};
+
+		emmc {
+			frequency = <0>; /* Filled in by the boot loader. */
+		};
+	};
+
 	memory@00000000 {
 		device_type = "memory";
 		reg = <0 0x00000000 0 0x10000000>;
@@ -153,7 +170,7 @@
 	};
 
         axxia_femac0: femac@0x2010120000 {
-                compatible = "acp-femac";
+                compatible = "lsi,acp-femac";
 		device_type = "network";
 		reg = <0x20 0x10120000 0 0x1000>,
    		      <0x20 0x10121000 0 0x1000>,
