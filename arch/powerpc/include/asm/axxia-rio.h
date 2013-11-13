@@ -10,26 +10,26 @@
 #define AXXIA_RIO_SYSMEM_BARRIER()	__asm__ __volatile__("msync")
 
 #define		AXXIA_RIO_DISABLE_MACHINE_CHECK()	\
-			{									\
-			mtmsr(mfmsr() & ~(MSR_ME));		\
+			{				\
+			mtmsr(mfmsr() & ~(MSR_ME));	\
 			__asm__ __volatile__("msync");	\
 			}
 
 #define		AXXIA_RIO_ENABLE_MACHINE_CHECK()	\
-			{									\
-			mtmsr(mfmsr() | (MSR_ME));			\
-			__asm__ __volatile__("msync");		\
+			{				\
+			mtmsr(mfmsr() | (MSR_ME));	\
+			__asm__ __volatile__("msync");	\
 			}
 
 #define		AXXIA_RIO_IF_MACHINE_CHECK(mcsr)	\
-			{									\
-			__asm__ __volatile__("msync");		\
-			mcsr = mfspr(SPRN_MCSR);			\
-			if (mcsr != 0) {					\
-				/* machine check would have occurred ! */	\
-				/* clear it */								\
-				mtspr(SPRN_MCSR, 0);						\
-				__asm__ __volatile__("msync");				\
+			{				\
+			__asm__ __volatile__("msync");	\
+			mcsr = mfspr(SPRN_MCSR);	\
+			if (mcsr != 0) {		\
+				/* machine check would have occurred ! */ \
+				/* clear it */		\
+				mtspr(SPRN_MCSR, 0);	\
+				__asm__ __volatile__("msync");	\
 			} }
 
 #define __acp_read_rio_config(x, addr, err, op)			\
@@ -72,7 +72,11 @@ extern int axxia_rio_apio_disable(struct rio_mport *mport);
 extern int axxia_rio_rpio_enable(struct rio_mport *mport, u32 mask, u32 bits);
 extern int axxia_rio_rpio_disable(struct rio_mport *mport);
 
-#define	axxia_rapidio_board_init(v)	(0)
+static inline int axxia_rapidio_board_init(int devNum, int *portNdx)
+{
+	(*portNdx) = 0;
+	return 0;
+}
 
 
 /*****************************/
