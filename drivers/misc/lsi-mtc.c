@@ -2731,6 +2731,7 @@ mtc_dev_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		{
 			struct ncp_axis_mtc_MTC_CONFIG0_REG_ADDR_r_t cfg0 = { 0 };
 			int start_stop;
+
 			if (copy_from_user
 			    ((void *)&start_stop, (void *)arg, sizeof(int))) {
 				printk(KERN_DEBUG "MTC Error ioctl\n");
@@ -2739,6 +2740,10 @@ mtc_dev_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 
 			if ((start_stop != 0) && (start_stop != 1))
 				return -EINVAL;
+
+			/* clear interrupt status before hit start */
+			if (start_stop == 1)
+				dev->regs->int_status = 0x7f;
 
 			cfg0 =
 			    *((struct ncp_axis_mtc_MTC_CONFIG0_REG_ADDR_r_t *)
@@ -3080,6 +3085,8 @@ static long _mtc_config(struct mtc_device *dev, struct lsi_mtc_cfg_t *pMTCCfg)
 	       dev->regs->config1, dev->regs->execute);
 
 #endif
-	/* test */
+	/* clear ecc interrupt status */
+	dev->regs->ecc_int_status = 0xf;
+
 	return 0;
 }
