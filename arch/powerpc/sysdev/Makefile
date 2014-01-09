@@ -72,5 +72,3 @@ subdir-ccflags-$(CONFIG_PPC_WERROR) := -Werror
 obj-$(CONFIG_PPC_XICS)		+= xics/
 
 obj-$(CONFIG_GE_FPGA)		+= ge/
-
-obj-$(CONFIG_ACP)		+= lsi_acp_wrappers.o
