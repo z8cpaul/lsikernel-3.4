@@ -1574,6 +1574,7 @@ retry:
 		}
 		kfree(nptr);
 		mport = rio_get_mport(RIO_ANY_ID, mport);
+		key = 0;
 	}
 	rdev = NULL;
 done:
