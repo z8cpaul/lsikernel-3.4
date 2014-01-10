@@ -919,9 +919,6 @@ static void release_dme(struct kref *kref)
 	struct rio_msg_desc *desc;
 	int i;
 
-	if (me->tx_ack != NULL)
-		kfree(me->tx_ack);
-
 	if (me->desc) {
 		for (i = 0, desc = me->desc; i < me->entries; i++, desc++) {
 			if (desc->msg_virt != NULL)
@@ -1116,12 +1113,6 @@ static struct rio_msg_dme *alloc_message_engine(struct rio_mport *mport,
 			entries, GFP_KERNEL);
 	if (!me->descriptors)
 		goto err;
-	if (ack_buf) {
-		me->tx_ack = kzalloc(sizeof(struct rio_msg_tx_ack) * entries,
-				     GFP_KERNEL);
-		if (!me->tx_ack)
-			goto err;
-	}
 	me->entries = entries;
 	me->dev_id = dev_id;
 	me->entries_in_use = 0;
@@ -1207,7 +1198,7 @@ static void ob_dme_irq_handler(struct rio_irq_handler *h, u32 state)
 	struct rio_mport *mport = h->mport;
 	struct rio_priv *priv = mport->priv;
 	struct rio_msg_dme *mbox = h->data;
-	int i, ack_id = 0;
+	int i;
 	u32 dme_stat, dw0, dme_no = 31 - CNTLZW(state);
 	u32 dme_ctrl;
 	unsigned long flags;
@@ -1244,11 +1235,6 @@ static void ob_dme_irq_handler(struct rio_irq_handler *h, u32 state)
 
 		if ((dw0 & DME_DESC_DW0_VALID) &&
 		    (dw0 & DME_DESC_DW0_READY_MASK)) {
-			struct rio_msg_tx_ack *tx_ack = &mbox->tx_ack[ack_id++];
-
-			tx_ack->err_state = DESC_STATE_TO_ERRNO(dw0);
-			tx_ack->cookie = desc->cookie;
-
 			if (!priv->internalDesc) {
 				*((u32 *)DESC_TABLE_W0_MEM(mbox, desc->desc_no))
 					= dw0 & DME_DESC_DW0_NXT_DESC_VALID;
@@ -1260,26 +1246,23 @@ static void ob_dme_irq_handler(struct rio_irq_handler *h, u32 state)
 			__ob_dme_dw_dbg(priv, dw0);
 
 			mbox->entries_in_use--;
+
+			/**
+			* UP-call to net device handler
+			*/
+			if (mport->outb_msg[dme_no].mcback) {
+				__ob_dme_event_dbg(priv, dme_no,
+						1 << RIO_OB_DME_TX_DESC_READY);
+
+				mport->outb_msg[dme_no].mcback(mport,
+							mbox->dev_id,
+							dme_no,
+							i,
+							desc->cookie);
+			}
 		}
 	}
 	spin_unlock_irqrestore(&mbox->lock, flags);
-
-	/**
-	 * UP-call to net device handler
-	 */
-	if (mport->outb_msg[dme_no].mcback) {
-		for (i = 0; i < ack_id; i++) {
-			struct rio_msg_tx_ack *tx_ack = &mbox->tx_ack[i];
-
-			__ob_dme_event_dbg(priv, dme_no,
-					   1 << RIO_OB_DME_TX_DESC_READY);
-			mport->outb_msg[dme_no].mcback(mport,
-						       mbox->dev_id,
-						       dme_no,
-						       tx_ack->err_state,
-						       tx_ack->cookie);
-		}
-	}
 }
 
 /**
