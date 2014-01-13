@@ -1115,7 +1115,7 @@ static struct rio_msg_dme *alloc_message_engine(struct rio_mport *mport,
 	me->entries_in_use = 0;
 	me->write_idx = 0;
 	me->read_idx = 0;
-	me->pending = 0;
+	atomic_set(&me->pending, 0);
 	me->tx_dme_tmo = 0;
 	me->dme_no = dme_no;
 
@@ -1474,6 +1474,7 @@ static void ib_dme_irq_handler(struct rio_irq_handler *h, u32 state)
 		u32 dw0;
 		int dme_no = 31 - CNTLZW(dme_mask);
 		int num_new;
+		int nPending;
 		dme_mask ^= (1 << dme_no);
 
 		while (mb->me[letter]->dme_no != dme_no)
@@ -1550,7 +1551,7 @@ static void ib_dme_irq_handler(struct rio_irq_handler *h, u32 state)
 				me->write_idx = (me->write_idx + 1) %
 						 me->entries;
 				num_new++;
-				me->pending++;
+				atomic_inc(&me->pending);
 				if (num_new == me->entries)
 					break;
 			}
@@ -1564,7 +1565,8 @@ static void ib_dme_irq_handler(struct rio_irq_handler *h, u32 state)
 			__ib_dme_event_dbg(priv, dme_no,
 					   1 << RIO_IB_DME_RX_RING_FULL);
 
-		if (me->pending &&
+		nPending = atomic_read(&me->pending);
+		if (nPending &&
 		    mport->inb_msg[mbox_no].mcback) {
 
 			mport->inb_msg[mbox_no].mcback(mport,
@@ -2345,6 +2347,7 @@ void *axxia_get_inb_message(struct rio_mport *mport, int mbox, int letter,
 	struct rio_rx_mbox *mb;
 	struct rio_msg_dme *me;
 	unsigned long iflags;
+	int nPending;
 	void *buf = NULL;
 
 	if ((mbox < 0) || (mbox >= RIO_MAX_RX_MBOX))
@@ -2371,7 +2374,8 @@ void *axxia_get_inb_message(struct rio_mport *mport, int mbox, int letter,
 		__rio_local_write_config_32(mport, RAB_INTR_ENAB_IDME, intr);
 	}
 
-	while (me->pending) {
+	nPending = atomic_read(&me->pending);
+	while (nPending) {
 		struct rio_msg_desc *desc = &me->desc[me->read_idx];
 		u32 dw0, dw1;
 
@@ -2399,7 +2403,8 @@ void *axxia_get_inb_message(struct rio_mport *mport, int mbox, int letter,
 					(dw0 & 0xff) | DME_DESC_DW0_VALID);
 			}
 			me->read_idx = (me->read_idx + 1) % me->entries;
-			me->pending--;
+			atomic_dec(&me->pending);
+			nPending--;
 			__ib_dme_event_dbg(priv, me->dme_no,
 					   1 << RIO_IB_DME_DESC_ERR);
 		} else {
@@ -2447,7 +2452,8 @@ void *axxia_get_inb_message(struct rio_mport *mport, int mbox, int letter,
 			mb->next_rx_slot = (mb->next_rx_slot + 1) %
 					    mb->ring_size;
 			me->read_idx = (me->read_idx + 1) % me->entries;
-			me->pending--;
+			atomic_dec(&me->pending);
+			nPending--;
 			goto done;
 		}
 	}
