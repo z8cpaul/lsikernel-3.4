@@ -974,7 +974,7 @@ static int rio_start_port(struct rio_mport *mport)
 		__rio_local_read_config_32(mport, RIO_DEV_ID_CAR, &didcar);
 		__rio_local_read_config_32(mport, RAB_VER, &rabver);
 
-		printk("rio[%d]: AR[%d] DIDCAR[%x]=%08x RAB_VER[%x]=%08x\n",
+		printk(KERN_INFO "rio[%d]: AR[%d] DIDCAR[%x]=%08x RAB_VER[%x]=%08x\n",
 			mport->id,
 			__LINE__,
 			RIO_DEV_ID_CAR, didcar,
