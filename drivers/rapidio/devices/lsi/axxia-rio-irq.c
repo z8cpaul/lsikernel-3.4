@@ -953,13 +953,13 @@ static void release_dme(struct kref *kref)
 
 	if (me->desc) {
 		for (i = 0, desc = me->desc; i < me->entries; i++, desc++) {
-			if (desc->msg_virt != NULL)
+			if (desc->msg_virt)
 				kfree(desc->msg_virt);
 		}
 		kfree(me->desc);
 	}
 
-	if (me->descriptors != NULL)
+	if (me->descriptors)
 		kfree(me->descriptors);
 
 	if (!priv->internalDesc) {
@@ -1083,7 +1083,7 @@ static void release_mbox(struct kref *kref)
 
 	priv->ib_dme_irq[mb->mbox_no].irq_state_mask = 0;
 
-	if (mb->virt_buffer != NULL)
+	if (mb->virt_buffer)
 		kfree(mb->virt_buffer);
 
 	kfree(mb);
