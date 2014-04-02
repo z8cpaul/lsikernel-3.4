@@ -14,7 +14,6 @@
 #include <linux/init.h>
 #include <linux/platform_device.h>
 #include <linux/clk.h>
-#include <linux/clkdev.h>
 #include <linux/err.h>
 #include <linux/i2c.h>
 #include <linux/io.h>
@@ -501,6 +500,10 @@ axxia_i2c_probe(struct platform_device *pdev)
 	u32 bus = pdev->id;
 	int irq = 0;
 	int ret = 0;
+	int speed_property = 0;
+
+	speed_property = of_find_compatible_node(NULL, NULL,
+		"lsi,axxia35xx") != NULL;
 
 	base = of_iomap(np, 0);
 	if (!base) {
@@ -537,7 +540,11 @@ axxia_i2c_probe(struct platform_device *pdev)
 
 	of_property_read_u32(np, "bus", &bus);
 
-	of_property_read_u32(np, "clock-frequency", &idev->bus_clk_rate);
+	if (speed_property)
+		of_property_read_u32(np, "speed", &idev->bus_clk_rate);
+	else
+		of_property_read_u32(np, "clock-frequency",
+			 &idev->bus_clk_rate);
 
 	if (idev->bus_clk_rate == 0)
 		idev->bus_clk_rate = 100000; /* default clock rate */
